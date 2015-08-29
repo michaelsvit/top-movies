@@ -178,7 +178,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         private String getSortingParam() {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
             String sortByPref = preferences.getString(getString(R.string.pref_sort_by_key), getString(R.string.pref_sort_by_default_value));
-            String orderPref = preferences.getString(getString(R.string.pref_order_key), getString(R.string.pref_order_default_value));
             String sortParam = "";
 
             if(sortByPref.equals("Popularity")) {
@@ -188,12 +187,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
             }
 
             sortParam += ".desc";
-
-            if(orderPref.equals("Descending")) {
-                sortParam += "desc";
-            } else if(orderPref.equals("Ascending")) {
-                sortParam += "asc";
-            }
 
             return sortParam;
         }

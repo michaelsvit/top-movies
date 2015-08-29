@@ -11,14 +11,4 @@
         <item>Rating</item>
     </array>
 
-    <array name="pref_order_entries">
-        <item>Descending</item>
-        <item>Ascending</item>
-    </array>
-
-    <array name="pref_order_values">
-        <item>Descending</item>
-        <item>Ascending</item>
-    </array>
-
 </resources>

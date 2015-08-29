@@ -34,7 +34,6 @@ public class SettingsActivityFragment extends PreferenceFragment implements Shar
         addPreferencesFromResource(R.xml.preferences);
         //Update summaries
         onSharedPreferenceChanged(getPreferenceScreen().getSharedPreferences(), getString(R.string.pref_sort_by_key));
-        onSharedPreferenceChanged(getPreferenceScreen().getSharedPreferences(), getString(R.string.pref_order_key));
     }
 
     @Override
@@ -42,9 +41,6 @@ public class SettingsActivityFragment extends PreferenceFragment implements Shar
         if(key.equals(getString(R.string.pref_sort_by_key))) {
             Preference sortPref = findPreference(key);
             sortPref.setSummary(sharedPreferences.getString(key, ""));
-        } else if(key.equals(getString(R.string.pref_order_key))) {
-            Preference orderPref = findPreference(key);
-            orderPref.setSummary(sharedPreferences.getString(key, ""));
         }
     }
 }
