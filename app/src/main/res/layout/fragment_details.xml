@@ -1,0 +1,105 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.michael.topmovies.DetailsFragment"
+    android:background="@color/backgroundPrimary">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView android:id="@+id/details_backdrop"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:adjustViewBounds="true"
+            android:scaleType="centerInside"/>
+
+        <LinearLayout android:id="@+id/details_linear_layout"
+            android:layout_below="@id/details_backdrop"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:paddingRight="16dp"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:paddingTop="16dp"
+                android:layout_weight="2"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_weight="2"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:textSize="16sp"
+                    android:text="Release Date"
+                    android:textColor="@color/textSecondary"
+                    android:gravity="center_horizontal"/>
+
+                <TextView android:id="@+id/details_release_date"
+                    android:layout_weight="3"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:text="2015-03-17"
+                    android:textColor="@color/textPrimary"
+                    android:gravity="center_horizontal"/>
+
+                <TextView
+                    android:layout_weight="2"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:textSize="16sp"
+                    android:text="Audience Rating"
+                    android:textColor="@color/textSecondary"
+                    android:gravity="center_horizontal"/>
+
+                <TextView android:id="@+id/details_rating"
+                    android:layout_weight="3"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:text="7.5"
+                    android:textColor="@color/textPrimary"
+                    android:gravity="center_horizontal"/>
+
+            </LinearLayout>
+
+            <ImageView android:id="@+id/details_movie_poster"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent" />
+
+        </LinearLayout>
+
+        <TextView android:id="@+id/details_synopsis_title"
+            android:layout_below="@id/details_linear_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp"
+            android:gravity="center"
+            android:text="Synopsis"
+            android:textColor="@color/textSecondary"
+            android:textSize="20sp"
+            android:textStyle="bold"/>
+
+        <TextView android:id="@+id/details_synopsis"
+            android:layout_below="@id/details_synopsis_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/details_synopsis_dummy_text"
+            android:textColor="@color/textPrimary"/>
+
+    </RelativeLayout>
+
+</ScrollView>
