@@ -160,6 +160,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
             final String SEARCH_TYPE = "discover";
             final String ITEM_TYPE = "movie";
             final String SORT_PARAM = "sort_by";
+            final String MIN_VOTE_COUNT_PARAM = "vote_count.gte";
             final String API_KEY_PARAM = "api_key";
             final String API_KEY = "/* replace with own api key */";
 
@@ -170,6 +171,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
                     .appendPath(SEARCH_TYPE)
                     .appendPath(ITEM_TYPE)
                     .appendQueryParameter(SORT_PARAM, getSortingParam())
+                    .appendQueryParameter(MIN_VOTE_COUNT_PARAM, "100")
                     .appendQueryParameter(API_KEY_PARAM, API_KEY);
 
             return builder.build().toString();
