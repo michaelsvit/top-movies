@@ -20,20 +20,22 @@ public class ImageAdapter extends ArrayAdapter<MovieEntry> {
     Context context;
     int resourceId;
     List<MovieEntry> movies;
+    LayoutInflater layoutInflater;
 
     public ImageAdapter(Context context, int resourceId, List<MovieEntry> movies) {
         super(context, resourceId, movies);
         this.context = context;
         this.resourceId = resourceId;
         this.movies = movies;
+        layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
         //Make sure convertView is inflated already before recycling it
         if (convertView == null) {
-            convertView = inflater.inflate(resourceId, parent, false);
+            convertView = layoutInflater.inflate(resourceId, parent, false);
         }
 
         //Put image into imageView using Picasso
@@ -49,7 +51,7 @@ public class ImageAdapter extends ArrayAdapter<MovieEntry> {
         final String AUTHORITY = "image.tmdb.org";
         final String TITLE_PATH = "t";
         final String POSTER_PATH = "p";
-        final String POSTER_SIZE = "w185";
+        final String POSTER_SIZE = "w342";
         final String POSTER_ID = path;
 
         builder.scheme(SCHEME)
