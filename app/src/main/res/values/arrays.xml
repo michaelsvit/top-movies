@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <array name="pref_sort_by_entries">
+        <item>Most Popular</item>
+        <item>Highest Rated</item>
+    </array>
+
+    <array name="pref_sort_by_values">
+        <item>Popularity</item>
+        <item>Rating</item>
+    </array>
+
+    <array name="pref_order_entries">
+        <item>Descending</item>
+        <item>Ascending</item>
+    </array>
+
+    <array name="pref_order_values">
+        <item>Descending</item>
+        <item>Ascending</item>
+    </array>
+
+</resources>
