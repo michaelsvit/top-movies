@@ -15,6 +15,7 @@ import java.util.List;
 
 /**
  * Created by Michael on 8/22/2015.
+ * Custom ArrayAdapter to fill gridView with movie posters
  */
 public class ImageAdapter extends ArrayAdapter<MovieEntry> {
     Context context;
@@ -45,14 +46,13 @@ public class ImageAdapter extends ArrayAdapter<MovieEntry> {
         return imageView;
     }
 
-    private Uri constructImageUri(String path) {
+    private Uri constructImageUri(final String POSTER_ID) {
         Uri.Builder builder = new Uri.Builder();
         final String SCHEME = "http";
         final String AUTHORITY = "image.tmdb.org";
         final String TITLE_PATH = "t";
         final String POSTER_PATH = "p";
         final String POSTER_SIZE = "w342";
-        final String POSTER_ID = path;
 
         builder.scheme(SCHEME)
                 .authority(AUTHORITY)
