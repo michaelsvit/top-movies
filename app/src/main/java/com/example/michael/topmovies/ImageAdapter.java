@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
@@ -37,8 +36,6 @@ public class ImageAdapter extends ArrayAdapter<MovieEntry> {
         if (convertView == null) {
             //Use extended ImageView with preset aspect ratio of 1.5
             convertView = new PosterImageView(context);
-            convertView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-            ((ImageView)convertView).setScaleType(ImageView.ScaleType.FIT_CENTER);
         }
 
         //Put image into imageView using Picasso
