@@ -36,9 +36,12 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        MainActivityFragment mainActivityFragment = new MainActivityFragment();
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.add(R.id.activity_main_container, mainActivityFragment, "grid_view_fragment").commit();
+        //Attach gridView fragment to the activity, or the last viewed fragment if one exists
+        if(savedInstanceState == null) {
+            MainActivityFragment mainActivityFragment = new MainActivityFragment();
+            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            transaction.add(R.id.activity_main_container, mainActivityFragment, MainActivityFragment.FRAGMENT_TAG).commit();
+        }
 
         movieEntries = new ArrayList<>();
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -112,6 +115,13 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         transaction.replace(R.id.activity_main_container, fragment);
         transaction.addToBackStack(null);
         transaction.commit();
+    }
+
+    private void updateGridContent() {
+        MainActivityFragment fragment = (MainActivityFragment) getFragmentManager().findFragmentByTag("grid_view_fragment");
+        if (fragment != null) {
+            fragment.updateGridContent();
+        }
     }
 
     private class GetData extends AsyncTask<Void, Void, String> {
@@ -243,10 +253,5 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
 
             return jsonData;
         }
-    }
-
-    private void updateGridContent() {
-        MainActivityFragment fragment = (MainActivityFragment) getFragmentManager().findFragmentByTag("grid_view_fragment");
-        fragment.updateGridContent();
     }
 }

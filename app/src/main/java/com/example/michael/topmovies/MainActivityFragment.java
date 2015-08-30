@@ -20,6 +20,8 @@ import java.util.List;
 public class MainActivityFragment extends android.app.Fragment {
 
     final String LOG_TAG = MainActivityFragment.class.getSimpleName();
+    public static final String FRAGMENT_TAG = "grid_view_fragment";
+
     GetMoviesList callback;
     ArrayAdapter<MovieEntry> adapter;
     List<MovieEntry> movieEntries;
@@ -61,8 +63,14 @@ public class MainActivityFragment extends android.app.Fragment {
 
         //Set title text to "Top Movies"
         AppCompatActivity activity = (AppCompatActivity) getActivity();
-        if(activity != null)
-        activity.getSupportActionBar().setTitle("Top Movies");
+        if(activity != null) {
+            try {
+                activity.getSupportActionBar().setTitle("Top Movies");
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+                Log.e(LOG_TAG, "SupportActionBar is null");
+            }
+        }
     }
 
     @Override
@@ -85,6 +93,8 @@ public class MainActivityFragment extends android.app.Fragment {
     }
 
     public void updateGridContent() {
-        adapter.notifyDataSetChanged();
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
     }
 }
