@@ -14,7 +14,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:adjustViewBounds="true"
-            android:scaleType="centerInside"/>
+            android:scaleType="fitCenter"/>
 
         <LinearLayout android:id="@+id/details_linear_layout"
             android:layout_below="@id/details_backdrop"
