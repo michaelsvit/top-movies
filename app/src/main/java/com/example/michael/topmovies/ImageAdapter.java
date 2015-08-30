@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
@@ -19,24 +20,25 @@ import java.util.List;
  */
 public class ImageAdapter extends ArrayAdapter<MovieEntry> {
     Context context;
-    int resourceId;
     List<MovieEntry> movies;
     LayoutInflater layoutInflater;
 
-    public ImageAdapter(Context context, int resourceId, List<MovieEntry> movies) {
-        super(context, resourceId, movies);
+    public ImageAdapter(Context context, List<MovieEntry> movies) {
+        //grid_item layout isn't used, only there to allow calling super()
+        super(context, R.layout.grid_item, movies);
         this.context = context;
-        this.resourceId = resourceId;
         this.movies = movies;
         layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-
         //Make sure convertView is inflated already before recycling it
         if (convertView == null) {
-            convertView = layoutInflater.inflate(resourceId, parent, false);
+            //Use extended ImageView with preset aspect ratio of 1.5
+            convertView = new PosterImageView(context);
+            convertView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            ((ImageView)convertView).setScaleType(ImageView.ScaleType.FIT_CENTER);
         }
 
         //Put image into imageView using Picasso

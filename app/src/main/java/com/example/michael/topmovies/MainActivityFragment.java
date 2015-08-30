@@ -79,7 +79,7 @@ public class MainActivityFragment extends android.app.Fragment {
         movieEntries = callback.getMoviesList();
 
         //Bind adapter to GridView
-        adapter = new ImageAdapter(activity, R.layout.grid_item, movieEntries);
+        adapter = new ImageAdapter(activity, movieEntries);
         GridView gridView = (GridView) activity.findViewById(R.id.grid_view);
         gridView.setAdapter(adapter);
     }
