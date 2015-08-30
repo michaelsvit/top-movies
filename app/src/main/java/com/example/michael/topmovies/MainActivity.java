@@ -28,6 +28,8 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements MainActivityFragment.GetMoviesList {
 
     protected List<MovieEntry> movieEntries;
+    String currentSorting;
+    SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,9 +41,25 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         transaction.add(R.id.activity_main_container, mainActivityFragment, "grid_view_fragment").commit();
 
         movieEntries = new ArrayList<>();
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        currentSorting = sharedPreferences.getString(getString(R.string.pref_sort_by_key), getString(R.string.pref_sort_by_default_value));
 
         //Initiate AsyncTask to download data from TMDb
         new GetData().execute();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        //Check if sorting preference has changed
+        final String sortingPreference = sharedPreferences.getString(getString(R.string.pref_sort_by_key), "");
+        if(!currentSorting.equals(sortingPreference)) {
+            movieEntries.clear();
+            new GetData().execute();
+            updateGridContent();
+            currentSorting = sortingPreference;
+        }
     }
 
     @Override
@@ -107,8 +125,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
             parseJson(jsonData);
 
             //Notify fragment that the data set has changed
-            MainActivityFragment fragment = (MainActivityFragment) getFragmentManager().findFragmentByTag("grid_view_fragment");
-            fragment.updateGridContent();
+            updateGridContent();
         }
 
         private void parseJson(final String jsonData) {
@@ -226,5 +243,10 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
 
             return jsonData;
         }
+    }
+
+    private void updateGridContent() {
+        MainActivityFragment fragment = (MainActivityFragment) getFragmentManager().findFragmentByTag("grid_view_fragment");
+        fragment.updateGridContent();
     }
 }
