@@ -2,7 +2,9 @@ package com.example.michael.topmovies;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -61,11 +63,19 @@ public class MainActivityFragment extends android.app.Fragment {
     public void onResume() {
         super.onResume();
 
-        //Set title text to "Top Movies"
+        //Set action bar text to "Top Movies" and show it in portrait mode, or else hide it
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         if(activity != null) {
             try {
-                activity.getSupportActionBar().setTitle("Top Movies");
+                ActionBar actionBar = activity.getSupportActionBar();
+
+                //Hide action bar on landscape orientation
+                if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    actionBar.hide();
+                } else {
+                    actionBar.setTitle("Top Movies");
+                    actionBar.show();
+                }
             } catch (NullPointerException e) {
                 e.printStackTrace();
                 Log.e(LOG_TAG, "SupportActionBar is null");

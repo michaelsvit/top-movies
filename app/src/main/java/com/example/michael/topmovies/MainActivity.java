@@ -115,6 +115,14 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         transaction.replace(R.id.activity_main_container, fragment);
         transaction.addToBackStack(null);
         transaction.commit();
+
+        //Make sure action bar is not hidden
+        try {
+            getSupportActionBar().show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e("MainActivity", "SupportActionBar is null");
+        }
     }
 
     private void updateGridContent() {
