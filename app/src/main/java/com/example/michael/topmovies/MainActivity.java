@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -170,7 +171,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         @Override
         protected String doInBackground(Void... params) {
             try {
-                String url = constructUrl();
+                String url = constructDiscoverUrl();
                 Log.d(LOG_TAG, "Constructed url is: " + url);
                 return downloadData(url);
             } catch (IOException e) {
@@ -180,28 +181,51 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
             return null;
         }
 
-        private String constructUrl() {
+        private String constructDiscoverUrl() {
+
+            final String[] PATH = {"discover", "movie"};
+            final String[] PARAM_KEYS = {"sort_by", "vote_count.gte", "api_key"};
+            final String[] PARAM_VALUES = {getSortingParam() ,"100", "/* replace with own api key */"};
+
+            return constructUrl(PATH, PARAM_KEYS, PARAM_VALUES).toString();
+        }
+
+        /*private String constructTrailersUrl() {
+
+            final String[] PATH = {"discover", "movie"};
+            final String[] PARAM_KEYS = {"sort_by", "vote_count.gte", "api_key"};
+            final String[] PARAM_VALUES = {"100", "/* replace with own api key */"};
+
+            return constructUrl(PATH, PARAM_KEYS, PARAM_VALUES).toString();
+        }
+
+        private String constructReviewsUrl() {
+
+            final String[] PATH = {"discover", "movie"};
+            final String[] PARAM_KEYS = {"sort_by", "vote_count.gte", "api_key"};
+            final String[] PARAM_VALUES = {"100", "/* replace with own api key */"};
+
+            return constructUrl(PATH, PARAM_KEYS, PARAM_VALUES).toString();
+        }*/
+
+        @NonNull
+        private Uri constructUrl(final String[] PATH, final String[] PARAM_KEYS, final String[] PARAM_VALUES) {
             final String SCHEME = "https";
             final String AUTHORITY = "api.themoviedb.org";
             final String API_VERSION = "3";
-            final String SEARCH_TYPE = "discover";
-            final String ITEM_TYPE = "movie";
-            final String SORT_PARAM = "sort_by";
-            final String MIN_VOTE_COUNT_PARAM = "vote_count.gte";
-            final String API_KEY_PARAM = "api_key";
-            final String API_KEY = "/* replace with own api key */";
 
             Uri.Builder builder = new Uri.Builder();
             builder.scheme(SCHEME)
                     .authority(AUTHORITY)
-                    .appendPath(API_VERSION)
-                    .appendPath(SEARCH_TYPE)
-                    .appendPath(ITEM_TYPE)
-                    .appendQueryParameter(SORT_PARAM, getSortingParam())
-                    .appendQueryParameter(MIN_VOTE_COUNT_PARAM, "100")
-                    .appendQueryParameter(API_KEY_PARAM, API_KEY);
+                    .appendPath(API_VERSION);
+            for(String pathSegment : PATH) {
+                builder.appendPath(pathSegment);
+            }
+            for(int i = 0; i < PARAM_KEYS.length; i++) {
+                builder.appendQueryParameter(PARAM_KEYS[i], PARAM_VALUES[i]);
+            }
 
-            return builder.build().toString();
+            return builder.build();
         }
 
         private String getSortingParam() {
