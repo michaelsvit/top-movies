@@ -1,7 +1,6 @@
 package com.example.michael.topmovies;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -32,13 +31,6 @@ public class MainActivityFragment extends android.app.Fragment {
     }
 
     public MainActivityFragment() {
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-
     }
 
     @Override
