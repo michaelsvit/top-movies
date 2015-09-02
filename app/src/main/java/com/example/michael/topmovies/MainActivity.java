@@ -131,7 +131,9 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
                 String discoverUrl = constructDiscoverUrl();
                 List<MovieEntry> movies = parseDiscoverJson(downloadData(discoverUrl));
 
-                movieEntries.addAll(movies);
+                if (movies != null) {
+                    movieEntries.addAll(movies);
+                }
 
                 return null;
             } catch (IOException e) {
