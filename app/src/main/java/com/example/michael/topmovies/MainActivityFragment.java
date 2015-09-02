@@ -2,6 +2,7 @@ package com.example.michael.topmovies;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -57,7 +58,10 @@ public class MainActivityFragment extends android.app.Fragment {
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         if(activity != null) {
             try {
-                activity.getSupportActionBar().setTitle("Top Movies");
+                ActionBar supportActionBar = activity.getSupportActionBar();
+                if (supportActionBar != null) {
+                    supportActionBar.setTitle("Top Movies");
+                }
             } catch (NullPointerException e) {
                 e.printStackTrace();
                 Log.e(LOG_TAG, "SupportActionBar is null");
