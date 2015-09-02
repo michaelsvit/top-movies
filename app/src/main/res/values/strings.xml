@@ -2,10 +2,15 @@
     <string name="app_name">Top Movies</string>
     <string name="action_settings">Settings</string>
 
-    <string name="details_synopsis_dummy_text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ac libero augue. Suspendisse et sem sapien. Pellentesque vel feugiat nulla. Nunc purus enim, mollis ut lobortis quis, maximus a ipsum. Nulla nec nulla ut lacus tincidunt accumsan non at arcu. Integer a dui ipsum. Nam aliquam lectus purus, id sollicitudin eros molestie a. Mauris at augue et mauris cursus condimentum. Pellentesque vulputate urna efficitur nisl iaculis egestas. Integer sit amet quam non lacus tristique porta. Sed elementum porttitor sem. In consequat quam quis mauris mattis porttitor. Proin nec porttitor mauris. Aliquam lacus libero, euismod sed turpis vitae, fringilla vulputate elit.</string>
+    <string name="details_dummy_synopsis_text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ac libero augue. Suspendisse et sem sapien. Pellentesque vel feugiat nulla. Nunc purus enim, mollis ut lobortis quis, maximus a ipsum. Nulla nec nulla ut lacus tincidunt accumsan non at arcu. Integer a dui ipsum. Nam aliquam lectus purus, id sollicitudin eros molestie a. Mauris at augue et mauris cursus condimentum. Pellentesque vulputate urna efficitur nisl iaculis egestas. Integer sit amet quam non lacus tristique porta. Sed elementum porttitor sem. In consequat quam quis mauris mattis porttitor. Proin nec porttitor mauris. Aliquam lacus libero, euismod sed turpis vitae, fringilla vulputate elit.</string>
     <string name="title_activity_settings">Settings</string>
     <string name="pref_sort_by_title">Sort By</string>
     <string name="pref_sort_by_key">pref_sort_by</string>
     <string name="pref_sort_by_default_value">Popularity</string>
+    <string name="details_release_date_title">Release Date</string>
+    <string name="details_dummy_release_date">2015-03-17</string>
+    <string name="details_audience_rating_title">Audience Rating</string>
+    <string name="details_dummy_audience_rating">7.5</string>
+    <string name="details_synopsis_title">Synopsis</string>
 
 </resources>
