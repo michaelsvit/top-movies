@@ -108,7 +108,10 @@ public class DetailsFragment extends Fragment {
                 trailersContainer.addView(view);
             }
             //Remove last line separator
-            trailersContainer.removeViewAt(trailersContainer.getChildCount() - 1);
+            int trailersChildCount = trailersContainer.getChildCount();
+            if (trailersChildCount > 0) {
+                trailersContainer.removeViewAt(trailersChildCount - 1);
+            }
 
             LinearLayout reviewsContainer = (LinearLayout) rootView.findViewById(R.id.details_reviews_container);
             //Fill reviews section with reviews and add separator lines
@@ -141,7 +144,10 @@ public class DetailsFragment extends Fragment {
                 reviewsContainer.addView(view);
             }
             //Remove last line separator
-            reviewsContainer.removeViewAt(reviewsContainer.getChildCount() - 1);
+            int reviewsChildCount = reviewsContainer.getChildCount();
+            if (reviewsChildCount > 0) {
+                reviewsContainer.removeViewAt(reviewsChildCount - 1);
+            }
         }
     }
 
