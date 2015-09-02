@@ -36,7 +36,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:textSize="16sp"
-                    android:text="Release Date"
+                    android:text="@string/details_release_date_title"
                     android:textColor="@color/textSecondary"
                     android:gravity="center_horizontal"/>
 
@@ -46,7 +46,7 @@
                     android:layout_height="0dp"
                     android:textSize="24sp"
                     android:textStyle="bold"
-                    android:text="2015-03-17"
+                    android:text="@string/details_dummy_release_date"
                     android:textColor="@color/textPrimary"
                     android:gravity="center_horizontal"/>
 
@@ -55,7 +55,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:textSize="16sp"
-                    android:text="Audience Rating"
+                    android:text="@string/details_audience_rating_title"
                     android:textColor="@color/textSecondary"
                     android:gravity="center_horizontal"/>
 
@@ -65,7 +65,7 @@
                     android:layout_height="0dp"
                     android:textSize="24sp"
                     android:textStyle="bold"
-                    android:text="7.5"
+                    android:text="@string/details_dummy_audience_rating"
                     android:textColor="@color/textPrimary"
                     android:gravity="center_horizontal"/>
 
@@ -85,7 +85,7 @@
             android:layout_marginTop="16dp"
             android:layout_marginBottom="8dp"
             android:gravity="center"
-            android:text="Synopsis"
+            android:text="@string/details_synopsis_title"
             android:textColor="@color/textSecondary"
             android:textSize="20sp"
             android:textStyle="bold"/>
@@ -97,8 +97,13 @@
             android:paddingLeft="8dp"
             android:paddingRight="8dp"
             android:layout_marginBottom="8dp"
-            android:text="@string/details_synopsis_dummy_text"
+            android:text="@string/details_dummy_synopsis_text"
             android:textColor="@color/textPrimary"/>
+
+        <LinearLayout
+            android:layout_below="@id/details_synopsis"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 
     </RelativeLayout>
 
