@@ -5,6 +5,7 @@ import android.app.Fragment;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Gravity;
@@ -49,26 +50,32 @@ public class DetailsFragment extends Fragment {
 
     private void fillDetails() {
         //Update action bar text
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(movieEntry.getTitle());
+        Activity activity = getActivity();
+        if (activity != null) {
+            ActionBar actionBar = ((AppCompatActivity) activity).getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.setTitle(movieEntry.getTitle());
+            }
 
-        ImageView backdrop = (ImageView) rootView.findViewById(R.id.details_backdrop);
-        Picasso.with(getActivity())
-                .load(constructBackdropUri(movieEntry.getBackdropPath()))
-                .into(backdrop);
+            ImageView backdrop = (ImageView) rootView.findViewById(R.id.details_backdrop);
+            Picasso.with(activity)
+                    .load(constructBackdropUri(movieEntry.getBackdropPath()))
+                    .into(backdrop);
 
-        TextView releaseDate = (TextView) rootView.findViewById(R.id.details_release_date);
-        releaseDate.setText(movieEntry.getReleaseDate());
+            TextView releaseDate = (TextView) rootView.findViewById(R.id.details_release_date);
+            releaseDate.setText(movieEntry.getReleaseDate());
 
-        TextView rating = (TextView) rootView.findViewById(R.id.details_rating);
-        rating.setText(String.valueOf(movieEntry.getVoteAverage()));
+            TextView rating = (TextView) rootView.findViewById(R.id.details_rating);
+            rating.setText(String.valueOf(movieEntry.getVoteAverage()));
 
-        ImageView poster = (ImageView) rootView.findViewById(R.id.details_movie_poster);
-        Picasso.with(getActivity())
-                .load(constructPosterUri(movieEntry.getPosterPath()))
-                .into(poster);
+            ImageView poster = (ImageView) rootView.findViewById(R.id.details_movie_poster);
+            Picasso.with(activity)
+                    .load(constructPosterUri(movieEntry.getPosterPath()))
+                    .into(poster);
 
-        TextView synopsis = (TextView) rootView.findViewById(R.id.details_synopsis);
-        synopsis.setText(movieEntry.getOverview());
+            TextView synopsis = (TextView) rootView.findViewById(R.id.details_synopsis);
+            synopsis.setText(movieEntry.getOverview());
+        }
     }
 
     private void fillTrailersAndReviews() {
@@ -120,13 +127,12 @@ public class DetailsFragment extends Fragment {
         return constructUri(path, POSTER_SIZE);
     }
 
-    private Uri constructUri(String path, String size) {
+    private Uri constructUri(final String POSTER_ID, String size) {
         Uri.Builder builder = new Uri.Builder();
         final String SCHEME = "http";
         final String AUTHORITY = "image.tmdb.org";
         final String TITLE_PATH = "t";
         final String POSTER_PATH = "p";
-        final String POSTER_ID = path;
 
         builder.scheme(SCHEME)
                 .authority(AUTHORITY)
