@@ -82,23 +82,23 @@ public class DetailsFragment extends Fragment {
         Activity activity = getActivity();
         if(activity != null) {
             LinearLayout trailersContainer = (LinearLayout) rootView.findViewById(R.id.details_trailers_container);
-            //Fill LinearLayout with trailers and add separator lines
+            //Fill trailers section with entries and add separator lines
             for (final Trailer trailer : movieEntry.getTrailers()) {
-                TextView textView = new TextView(activity);
-                textView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-                textView.setPadding(0, 40, 0, 40);
-                textView.setText(trailer.getName());
-                textView.setTextSize(20);
-                textView.setGravity(Gravity.CENTER);
-                textView.setTextColor(getResources().getColor(R.color.textPrimary));
-                textView.setOnClickListener(new View.OnClickListener() {
+                TextView trailerTextView = new TextView(activity);
+                trailerTextView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+                trailerTextView.setPadding(0, 40, 0, 40);
+                trailerTextView.setText(trailer.getName());
+                trailerTextView.setTextSize(20);
+                trailerTextView.setGravity(Gravity.CENTER);
+                trailerTextView.setTextColor(getResources().getColor(R.color.textPrimary));
+                trailerTextView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         Intent videoIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getVideoUrl(trailer.getKey())));
                         startActivity(videoIntent);
                     }
                 });
-                trailersContainer.addView(textView);
+                trailersContainer.addView(trailerTextView);
 
                 View view = new View(activity);
                 LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1);
@@ -109,6 +109,39 @@ public class DetailsFragment extends Fragment {
             }
             //Remove last line separator
             trailersContainer.removeViewAt(trailersContainer.getChildCount() - 1);
+
+            LinearLayout reviewsContainer = (LinearLayout) rootView.findViewById(R.id.details_reviews_container);
+            //Fill reviews section with reviews and add separator lines
+            for (Review review : movieEntry.getReviews()) {
+                TextView authorTextView = new TextView(activity);
+                LinearLayout.LayoutParams authorLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                authorLayoutParams.setMargins(16, 8, 16, 8);
+                authorTextView.setLayoutParams(authorLayoutParams);
+                authorTextView.setText(review.getAuthor());
+                authorTextView.setTextSize(16);
+                authorTextView.setGravity(Gravity.LEFT);
+                authorTextView.setTextColor(getResources().getColor(R.color.textSecondary));
+                reviewsContainer.addView(authorTextView);
+
+                TextView contentTextView = new TextView(activity);
+                LinearLayout.LayoutParams contentLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                contentLayoutParams.setMargins(8, 16, 8, 16);
+                contentTextView.setLayoutParams(contentLayoutParams);
+                contentTextView.setText(review.getContent());
+                contentTextView.setTextSize(14);
+                contentTextView.setGravity(Gravity.LEFT);
+                contentTextView.setTextColor(getResources().getColor(R.color.textPrimary));
+                reviewsContainer.addView(contentTextView);
+
+                View view = new View(activity);
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1);
+                layoutParams.setMargins(24, 0, 24, 0);
+                view.setLayoutParams(layoutParams);
+                view.setBackgroundColor(getResources().getColor(R.color.textSecondary));
+                reviewsContainer.addView(view);
+            }
+            //Remove last line separator
+            reviewsContainer.removeViewAt(reviewsContainer.getChildCount() - 1);
         }
     }
 
