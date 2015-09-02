@@ -27,7 +27,7 @@ public class MainActivityFragment extends android.app.Fragment {
     List<MovieEntry> movieEntries;
 
     public interface GetMoviesList {
-        List<MovieEntry> getMoviesList();
+        List<MovieEntry> getMovieEntries();
         void showMovieDetails(MovieEntry movie);
     }
 
@@ -80,7 +80,7 @@ public class MainActivityFragment extends android.app.Fragment {
             Log.e(LOG_TAG, "Activity did not implement GetMoviesList interface");
         }
 
-        movieEntries = callback.getMoviesList();
+        movieEntries = callback.getMovieEntries();
 
         //Bind adapter to GridView
         adapter = new ImageAdapter(activity, movieEntries);

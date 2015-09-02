@@ -4,11 +4,8 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -19,10 +16,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         currentSorting = sharedPreferences.getString(getString(R.string.pref_sort_by_key), getString(R.string.pref_sort_by_default_value));
 
         //Initiate AsyncTask to download data from TMDb
-        new GetData().execute();
+        new GetMoviesList().execute();
     }
 
     @Override
@@ -101,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
     }
 
     @Override
-    public List<MovieEntry> getMoviesList() {
+    public List<MovieEntry> getMovieEntries() {
         return movieEntries;
     }
 
@@ -125,22 +118,32 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         }
     }
 
-    private class GetData extends AsyncTask<Void, Void, String> {
-
-        String LOG_TAG = GetData.class.getSimpleName();
-
+    private class GetMoviesList extends GetData {
         @Override
-        protected void onPostExecute(String jsonData) {
-            super.onPostExecute(jsonData);
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
 
-            parseJson(jsonData);
-
-            //Notify fragment that the data set has changed
             updateGridContent();
         }
 
-        private void parseJson(final String jsonData) {
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                String discoverUrl = constructDiscoverUrl();
+                List<MovieEntry> movies = parseDiscoverJson(downloadData(discoverUrl));
+
+                movieEntries.addAll(movies);
+
+                return null;
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Error downloading data from url");
+            }
+            return null;
+        }
+
+        private List<MovieEntry> parseDiscoverJson(final String jsonData) {
             final String RESULTS_TAG = "results";
+            final String ID_TAG = "id";
             final String TITLE_TAG = "title";
             final String OVERVIEW_TAG = "overview";
             final String RELEASE_DATE_TAG = "release_date";
@@ -149,10 +152,12 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
             final String VOTE_AVERAGE_TAG = "vote_average";
 
             try {
+                List<MovieEntry> movies = new ArrayList<>();
                 JSONObject jsonStart = new JSONObject(jsonData);
                 JSONArray results = jsonStart.getJSONArray(RESULTS_TAG);
                 for(int i = 0; i < results.length(); i++) {
                     JSONObject movie = results.getJSONObject(i);
+                    int id = movie.getInt(ID_TAG);
                     String title = movie.getString(TITLE_TAG);
                     String overview = movie.getString(OVERVIEW_TAG);
                     String releaseDate = movie.getString(RELEASE_DATE_TAG);
@@ -160,24 +165,13 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
                     String backdropPath = movie.getString(BACKDROP_PATH_TAG);
                     double voteAverage = movie.getDouble(VOTE_AVERAGE_TAG);
 
-                    movieEntries.add(new MovieEntry(title, overview, releaseDate, posterPath, backdropPath, voteAverage));
+                    movies.add(new MovieEntry(id, title, overview, releaseDate, posterPath, backdropPath, voteAverage));
                 }
+                return movies;
             } catch (JSONException e) {
                 e.printStackTrace();
                 Log.e(LOG_TAG, "Error parsing json data");
             }
-        }
-
-        @Override
-        protected String doInBackground(Void... params) {
-            try {
-                String url = constructDiscoverUrl();
-                Log.d(LOG_TAG, "Constructed url is: " + url);
-                return downloadData(url);
-            } catch (IOException e) {
-                Log.e(LOG_TAG, "Error downloading data from url");
-            }
-
             return null;
         }
 
@@ -188,44 +182,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
             final String[] PARAM_VALUES = {getSortingParam() ,"100", "/* replace with own api key */"};
 
             return constructUrl(PATH, PARAM_KEYS, PARAM_VALUES).toString();
-        }
-
-        /*private String constructTrailersUrl() {
-
-            final String[] PATH = {"discover", "movie"};
-            final String[] PARAM_KEYS = {"sort_by", "vote_count.gte", "api_key"};
-            final String[] PARAM_VALUES = {"100", "/* replace with own api key */"};
-
-            return constructUrl(PATH, PARAM_KEYS, PARAM_VALUES).toString();
-        }
-
-        private String constructReviewsUrl() {
-
-            final String[] PATH = {"discover", "movie"};
-            final String[] PARAM_KEYS = {"sort_by", "vote_count.gte", "api_key"};
-            final String[] PARAM_VALUES = {"100", "/* replace with own api key */"};
-
-            return constructUrl(PATH, PARAM_KEYS, PARAM_VALUES).toString();
-        }*/
-
-        @NonNull
-        private Uri constructUrl(final String[] PATH, final String[] PARAM_KEYS, final String[] PARAM_VALUES) {
-            final String SCHEME = "https";
-            final String AUTHORITY = "api.themoviedb.org";
-            final String API_VERSION = "3";
-
-            Uri.Builder builder = new Uri.Builder();
-            builder.scheme(SCHEME)
-                    .authority(AUTHORITY)
-                    .appendPath(API_VERSION);
-            for(String pathSegment : PATH) {
-                builder.appendPath(pathSegment);
-            }
-            for(int i = 0; i < PARAM_KEYS.length; i++) {
-                builder.appendQueryParameter(PARAM_KEYS[i], PARAM_VALUES[i]);
-            }
-
-            return builder.build();
         }
 
         private String getSortingParam() {
@@ -242,40 +198,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
             sortParam += ".desc";
 
             return sortParam;
-        }
-
-        private String downloadData(String urlString) throws IOException {
-            String jsonData = "";
-            InputStream is = null;
-            final int BUFFER_SIZE = 500;
-
-            try {
-                //Initiate connection
-                URL url = new URL(urlString);
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setReadTimeout(10000);
-                connection.setConnectTimeout(15000);
-                connection.setRequestMethod("GET");
-                connection.connect();
-                Log.d(LOG_TAG, "Connection response code: " + connection.getResponseCode());
-
-                //Read data
-                is = connection.getInputStream();
-                InputStreamReader reader = new InputStreamReader(is);
-                char[] buffer = new char[BUFFER_SIZE];
-                int charsRead;
-
-                while ((charsRead = reader.read(buffer)) != -1) {
-                    jsonData += String.valueOf(buffer,0,charsRead);
-                    buffer = new char[BUFFER_SIZE];
-                }
-            } finally {
-                if(is != null) {
-                    is.close();
-                }
-            }
-
-            return jsonData;
         }
     }
 }
