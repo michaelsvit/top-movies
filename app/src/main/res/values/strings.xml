@@ -12,5 +12,6 @@
     <string name="details_audience_rating_title">Audience Rating</string>
     <string name="details_dummy_audience_rating">7.5</string>
     <string name="details_synopsis_title">Synopsis</string>
+    <string name="details_trailers_title">Trailers</string>
 
 </resources>

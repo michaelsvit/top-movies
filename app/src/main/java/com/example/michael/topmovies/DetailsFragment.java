@@ -1,14 +1,18 @@
 package com.example.michael.topmovies;
 
+import android.app.Activity;
 import android.app.Fragment;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -68,7 +72,42 @@ public class DetailsFragment extends Fragment {
     }
 
     private void fillTrailersAndReviews() {
+        Activity activity = getActivity();
+        if(activity != null) {
+            LinearLayout trailersContainer = (LinearLayout) rootView.findViewById(R.id.details_trailers_container);
+            //Fill LinearLayout with trailers and add separator lines
+            for (final Trailer trailer : movieEntry.getTrailers()) {
+                TextView textView = new TextView(activity);
+                textView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+                textView.setPadding(0, 40, 0, 40);
+                textView.setText(trailer.getName());
+                textView.setTextSize(20);
+                textView.setGravity(Gravity.CENTER);
+                textView.setTextColor(getResources().getColor(R.color.textPrimary));
+                textView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent videoIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getVideoUrl(trailer.getKey())));
+                        startActivity(videoIntent);
+                    }
+                });
+                trailersContainer.addView(textView);
 
+                View view = new View(activity);
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1);
+                layoutParams.setMargins(24, 0, 24, 0);
+                view.setLayoutParams(layoutParams);
+                view.setBackgroundColor(getResources().getColor(R.color.textSecondary));
+                trailersContainer.addView(view);
+            }
+            //Remove last line separator
+            trailersContainer.removeViewAt(trailersContainer.getChildCount() - 1);
+        }
+    }
+
+    private String getVideoUrl(String key) {
+        String youtubeUrl = "https://www.youtube.com/watch?v=";
+        return youtubeUrl + key;
     }
 
     private Uri constructBackdropUri(String path) {
@@ -102,6 +141,13 @@ public class DetailsFragment extends Fragment {
     }
 
     private class GetTrailerAndReviews extends GetData {
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+
+            fillTrailersAndReviews();
+        }
+
         @Override
         protected Void doInBackground(Void... params) {
             try {

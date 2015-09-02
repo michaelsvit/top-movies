@@ -100,10 +100,23 @@
             android:text="@string/details_dummy_synopsis_text"
             android:textColor="@color/textPrimary"/>
 
-        <LinearLayout
+        <TextView android:id="@+id/details_trailers_title"
             android:layout_below="@id/details_synopsis"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp"
+            android:gravity="center"
+            android:text="@string/details_trailers_title"
+            android:textColor="@color/textSecondary"
+            android:textSize="20sp"
+            android:textStyle="bold"/>
+
+        <LinearLayout android:id="@+id/details_trailers_container"
+            android:layout_below="@id/details_trailers_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"/>
 
     </RelativeLayout>
 
