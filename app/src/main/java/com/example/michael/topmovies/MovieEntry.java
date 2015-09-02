@@ -3,18 +3,24 @@ package com.example.michael.topmovies;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.List;
+
 /**
  * Created by Michael on 8/22/2015.
  */
 public class MovieEntry implements Parcelable {
+    private int id;
     private String title;
     private String overview;
     private String releaseDate;
     private String posterPath;
     private String backdropPath;
     private double voteAverage;
+    private List<Trailer> trailers;
+    private List<Review> reviews;
 
-    public MovieEntry(String title, String overview, String releaseDate, String posterPath, String backdropPath, double voteAverage) {
+    public MovieEntry(int id, String title, String overview, String releaseDate, String posterPath, String backdropPath, double voteAverage) {
+        this.id = id;
         this.title = title;
         this.overview = overview;
         this.releaseDate = releaseDate;
@@ -24,12 +30,27 @@ public class MovieEntry implements Parcelable {
     }
 
     public MovieEntry(Parcel in) {
+        id = in.readInt();
         title = in.readString();
         overview = in.readString();
         releaseDate = in.readString();
         posterPath = in.readString();
         backdropPath = in.readString();
         voteAverage = in.readDouble();
+        in.readList(trailers, Trailer.class.getClassLoader());
+        in.readList(reviews, Review.class.getClassLoader());
+    }
+
+    public List<Review> getReviews() {
+        return reviews;
+    }
+
+    public List<Trailer> getTrailers() {
+        return trailers;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String getBackdropPath() {
@@ -57,30 +78,29 @@ public class MovieEntry implements Parcelable {
     }
 
     @Override
-    public String toString() {
-        return "MovieEntry{" +
-                "title='" + title + '\'' +
-                ", overview='" + overview + '\'' +
-                ", releaseDate='" + releaseDate + '\'' +
-                ", posterPath='" + posterPath + '\'' +
-                ", backdropPath='" + backdropPath + '\'' +
-                ", voteAverage=" + voteAverage +
-                '}';
-    }
-
-    @Override
     public int describeContents() {
         return 0;
     }
 
+    public void setTrailers(List<Trailer> trailers) {
+        this.trailers = trailers;
+    }
+
+    public void setReviews(List<Review> reviews) {
+        this.reviews = reviews;
+    }
+
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
         dest.writeString(title);
         dest.writeString(overview);
         dest.writeString(releaseDate);
         dest.writeString(posterPath);
         dest.writeString(backdropPath);
         dest.writeDouble(voteAverage);
+        dest.writeList(trailers);
+        dest.writeList(reviews);
     }
 
     public static final Creator<MovieEntry> CREATOR = new Creator<MovieEntry>() {
