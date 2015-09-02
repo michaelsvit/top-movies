@@ -53,8 +53,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         final String sortingPreference = sharedPreferences.getString(getString(R.string.pref_sort_by_key), getString(R.string.pref_sort_by_default_value));
         if(!currentSorting.equals(sortingPreference)) {
             movieEntries.clear();
-            new GetData().execute();
-            updateGridContent();
+            new GetMoviesList().execute();
             currentSorting = sortingPreference;
         }
     }
