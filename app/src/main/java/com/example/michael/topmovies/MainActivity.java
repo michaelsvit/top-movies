@@ -19,9 +19,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements MainActivityFragment.GetMoviesList {
+public class MainActivity extends AppCompatActivity implements
+        MainActivityFragment.GetMoviesList, DetailsFragment.GetFavoritesDB {
 
-    public static final String FAVORITES_KEY = "favorites";
+    private FavoritesDB favoritesDB;
     protected List<MovieEntry> movieEntries;
     private String currentSorting;
     private SharedPreferences sharedPreferences;
@@ -41,9 +42,17 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         movieEntries = new ArrayList<>();
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         currentSorting = sharedPreferences.getString(getString(R.string.pref_sort_by_key), getString(R.string.pref_sort_by_default_value));
+        favoritesDB = new FavoritesDB(this);
 
-        //Initiate AsyncTask to download data from TMDb
-        new GetMoviesList().execute();
+        //TODO: Fix startup when sorting pref equals favorites
+        if(!currentSorting.equals("Favorites")) {
+            //Initiate AsyncTask to download data from TMDb
+            new GetMoviesList().execute();
+        } else {
+            //Show favorites from database
+            movieEntries.addAll(favoritesDB.getFavorites());
+            updateGridContent();
+        }
     }
 
     @Override
@@ -54,7 +63,12 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         final String sortingPreference = sharedPreferences.getString(getString(R.string.pref_sort_by_key), getString(R.string.pref_sort_by_default_value));
         if(!currentSorting.equals(sortingPreference)) {
             movieEntries.clear();
-            new GetMoviesList().execute();
+            if(sortingPreference.equals("Favorites")) {
+                movieEntries.addAll(favoritesDB.getFavorites());
+                updateGridContent();
+            } else {
+                new GetMoviesList().execute();
+            }
             currentSorting = sortingPreference;
         }
     }
@@ -119,6 +133,11 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         }
     }
 
+    @Override
+    public FavoritesDB getFavoritesDB() {
+        return favoritesDB;
+    }
+
     private class GetMoviesList extends GetData {
         @Override
         protected void onPostExecute(Void aVoid) {
@@ -131,7 +150,10 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         protected Void doInBackground(Void... params) {
             try {
                 String discoverUrl = constructDiscoverUrl();
-                List<MovieEntry> movies = parseDiscoverJson(downloadData(discoverUrl));
+                Log.d(LOG_TAG, "Constructed URL: " + discoverUrl);
+                String jsonData = downloadData(discoverUrl);
+                Log.d(LOG_TAG, "JSON data: " + jsonData);
+                List<MovieEntry> movies = parseDiscoverJson(jsonData);
 
                 if (movies != null) {
                     movieEntries.addAll(movies);

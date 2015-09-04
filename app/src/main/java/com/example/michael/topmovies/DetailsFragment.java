@@ -3,10 +3,8 @@ package com.example.michael.topmovies;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -29,16 +27,21 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class DetailsFragment extends Fragment {
 
-    static final String MOVIE_ARG_POSITION = "MovieEntry";
+    public static final String MOVIE_ARG_POSITION = "MovieEntry";
+    private final String LOG_TAG = DetailsFragment.class.getSimpleName();
 
     private MovieEntry movieEntry;
     private View rootView;
+    private GetFavoritesDB getDbCallback;
+    private FavoritesDB favoritesDB;
+
+    public interface GetFavoritesDB {
+        FavoritesDB getFavoritesDB();
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -58,14 +61,25 @@ public class DetailsFragment extends Fragment {
     }
 
     @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        Activity activity = getActivity();
+        try {
+            getDbCallback = (GetFavoritesDB) activity;
+            favoritesDB = getDbCallback.getFavoritesDB();
+        } catch (ClassCastException e) {
+            Log.e(LOG_TAG, "MainActivity did not implement GetFavoritesDB");
+        }
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         //Check if the movie is a favorite and show favorite menu action
         MenuItem favoritesMenuItem = menu.findItem(R.id.action_favorite);
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        Set<String> favoritesSet = sharedPreferences.getStringSet(MainActivity.FAVORITES_KEY, null);
-        if(favoritesSet != null) {
-            if(favoritesSet.contains(String.valueOf(movieEntry.getId()))) {
+        if (favoritesDB != null) {
+            if(favoritesDB.isFavorite(movieEntry.getId())) {
                 favoritesMenuItem.setIcon(android.R.drawable.btn_star_big_on);
             }
         }
@@ -86,23 +100,16 @@ public class DetailsFragment extends Fragment {
     }
 
     private void toggleFavorite(MenuItem item) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         int movieId = movieEntry.getId();
         //Check if the movie is already a favorite
-        Set<String> favoritesSet = sharedPreferences.getStringSet(MainActivity.FAVORITES_KEY, null);
-        if(favoritesSet != null) {
-            if(favoritesSet.contains(String.valueOf(movieId))) {
+        if (favoritesDB != null) {
+            if(favoritesDB.isFavorite(movieId)) {
                 item.setIcon(android.R.drawable.btn_star_big_off);
-                favoritesSet.remove(String.valueOf(movieId));
+                favoritesDB.removeFavorite(movieId);
             } else {
                 item.setIcon(android.R.drawable.btn_star_big_on);
-                favoritesSet.add(String.valueOf(movieId));
+                favoritesDB.setFavorite(movieEntry);
             }
-        } else {
-            item.setIcon(android.R.drawable.btn_star_big_on);
-            favoritesSet = new HashSet<>();
-            favoritesSet.add(String.valueOf(movieId));
-            sharedPreferences.edit().putStringSet(MainActivity.FAVORITES_KEY, favoritesSet).apply();
         }
     }
 
@@ -141,71 +148,79 @@ public class DetailsFragment extends Fragment {
         if(activity != null) {
             LinearLayout trailersContainer = (LinearLayout) rootView.findViewById(R.id.details_trailers_container);
             //Fill trailers section with entries and add separator lines
-            for (final Trailer trailer : movieEntry.getTrailers()) {
-                TextView trailerTextView = new TextView(activity);
-                trailerTextView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-                trailerTextView.setPadding(0, 40, 0, 40);
-                trailerTextView.setText(trailer.getName());
-                trailerTextView.setTextSize(20);
-                trailerTextView.setGravity(Gravity.CENTER);
-                trailerTextView.setTextColor(getResources().getColor(R.color.textPrimary));
-                trailerTextView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent videoIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getVideoUrl(trailer.getKey())));
-                        startActivity(videoIntent);
-                    }
-                });
-                trailersContainer.addView(trailerTextView);
-
-                View view = new View(activity);
-                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1);
-                layoutParams.setMargins(24, 0, 24, 0);
-                view.setLayoutParams(layoutParams);
-                view.setBackgroundColor(getResources().getColor(R.color.textSecondary));
-                trailersContainer.addView(view);
-            }
-            //Remove last line separator
-            int trailersChildCount = trailersContainer.getChildCount();
-            if (trailersChildCount > 0) {
-                trailersContainer.removeViewAt(trailersChildCount - 1);
-            }
+            fillTrailers(activity, trailersContainer);
 
             LinearLayout reviewsContainer = (LinearLayout) rootView.findViewById(R.id.details_reviews_container);
             //Fill reviews section with reviews and add separator lines
-            for (Review review : movieEntry.getReviews()) {
-                TextView authorTextView = new TextView(activity);
-                LinearLayout.LayoutParams authorLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                authorLayoutParams.setMargins(16, 8, 16, 8);
-                authorTextView.setLayoutParams(authorLayoutParams);
-                authorTextView.setText(review.getAuthor());
-                authorTextView.setTextSize(16);
-                authorTextView.setGravity(Gravity.LEFT);
-                authorTextView.setTextColor(getResources().getColor(R.color.textSecondary));
-                reviewsContainer.addView(authorTextView);
+            fillReviews(activity, reviewsContainer);
+        }
+    }
 
-                TextView contentTextView = new TextView(activity);
-                LinearLayout.LayoutParams contentLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                contentLayoutParams.setMargins(8, 16, 8, 16);
-                contentTextView.setLayoutParams(contentLayoutParams);
-                contentTextView.setText(review.getContent());
-                contentTextView.setTextSize(14);
-                contentTextView.setGravity(Gravity.LEFT);
-                contentTextView.setTextColor(getResources().getColor(R.color.textPrimary));
-                reviewsContainer.addView(contentTextView);
+    private void fillReviews(Activity activity, LinearLayout reviewsContainer) {
+        for (Review review : movieEntry.getReviews()) {
+            TextView authorTextView = new TextView(activity);
+            LinearLayout.LayoutParams authorLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            authorLayoutParams.setMargins(16, 8, 16, 8);
+            authorTextView.setLayoutParams(authorLayoutParams);
+            authorTextView.setText(review.getAuthor());
+            authorTextView.setTextSize(16);
+            authorTextView.setGravity(Gravity.LEFT);
+            authorTextView.setTextColor(getResources().getColor(R.color.textSecondary));
+            reviewsContainer.addView(authorTextView);
 
-                View view = new View(activity);
-                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1);
-                layoutParams.setMargins(24, 0, 24, 0);
-                view.setLayoutParams(layoutParams);
-                view.setBackgroundColor(getResources().getColor(R.color.textSecondary));
-                reviewsContainer.addView(view);
-            }
-            //Remove last line separator
-            int reviewsChildCount = reviewsContainer.getChildCount();
-            if (reviewsChildCount > 0) {
-                reviewsContainer.removeViewAt(reviewsChildCount - 1);
-            }
+            TextView contentTextView = new TextView(activity);
+            LinearLayout.LayoutParams contentLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            contentLayoutParams.setMargins(8, 16, 8, 16);
+            contentTextView.setLayoutParams(contentLayoutParams);
+            contentTextView.setText(review.getContent());
+            contentTextView.setTextSize(14);
+            contentTextView.setGravity(Gravity.LEFT);
+            contentTextView.setTextColor(getResources().getColor(R.color.textPrimary));
+            reviewsContainer.addView(contentTextView);
+
+            View view = new View(activity);
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1);
+            layoutParams.setMargins(24, 0, 24, 0);
+            view.setLayoutParams(layoutParams);
+            view.setBackgroundColor(getResources().getColor(R.color.textSecondary));
+            reviewsContainer.addView(view);
+        }
+        //Remove last line separator
+        int reviewsChildCount = reviewsContainer.getChildCount();
+        if (reviewsChildCount > 0) {
+            reviewsContainer.removeViewAt(reviewsChildCount - 1);
+        }
+    }
+
+    private void fillTrailers(Activity activity, LinearLayout trailersContainer) {
+        for (final Trailer trailer : movieEntry.getTrailers()) {
+            TextView trailerTextView = new TextView(activity);
+            trailerTextView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+            trailerTextView.setPadding(0, 40, 0, 40);
+            trailerTextView.setText(trailer.getName());
+            trailerTextView.setTextSize(20);
+            trailerTextView.setGravity(Gravity.CENTER);
+            trailerTextView.setTextColor(getResources().getColor(R.color.textPrimary));
+            trailerTextView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent videoIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getVideoUrl(trailer.getKey())));
+                    startActivity(videoIntent);
+                }
+            });
+            trailersContainer.addView(trailerTextView);
+
+            View view = new View(activity);
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1);
+            layoutParams.setMargins(24, 0, 24, 0);
+            view.setLayoutParams(layoutParams);
+            view.setBackgroundColor(getResources().getColor(R.color.textSecondary));
+            trailersContainer.addView(view);
+        }
+        //Remove last line separator
+        int trailersChildCount = trailersContainer.getChildCount();
+        if (trailersChildCount > 0) {
+            trailersContainer.removeViewAt(trailersChildCount - 1);
         }
     }
 
@@ -238,7 +253,7 @@ public class DetailsFragment extends Fragment {
                 .appendPath(size)
                 .appendEncodedPath(POSTER_ID);
 
-        Log.d("DetailsFragment", builder.build().toString());
+        Log.d(LOG_TAG, builder.build().toString());
 
         return builder.build();
     }
