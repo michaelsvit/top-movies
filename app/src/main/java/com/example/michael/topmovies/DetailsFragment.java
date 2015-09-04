@@ -3,13 +3,18 @@ package com.example.michael.topmovies;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -24,7 +29,9 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class DetailsFragment extends Fragment {
 
@@ -39,6 +46,8 @@ public class DetailsFragment extends Fragment {
         // Inflate the layout for this fragment
         rootView = inflater.inflate(R.layout.fragment_details, container, false);
 
+        setHasOptionsMenu(true);
+
         //Populate views with data from movie argument
         movieEntry = getArguments().getParcelable(MOVIE_ARG_POSITION);
         new GetTrailerAndReviews().execute();
@@ -46,6 +55,55 @@ public class DetailsFragment extends Fragment {
         fillDetails();
 
         return rootView;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        //Check if the movie is a favorite and show favorite menu action
+        MenuItem favoritesMenuItem = menu.findItem(R.id.action_favorite);
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        Set<String> favoritesSet = sharedPreferences.getStringSet(MainActivity.FAVORITES_KEY, null);
+        if(favoritesSet != null) {
+            if(favoritesSet.contains(String.valueOf(movieEntry.getId()))) {
+                favoritesMenuItem.setIcon(android.R.drawable.btn_star_big_on);
+            }
+        }
+
+        favoritesMenuItem.setVisible(true);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == R.id.action_favorite) {
+            //Toggle icon state and  favorite state
+            toggleFavorite(item);
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void toggleFavorite(MenuItem item) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        int movieId = movieEntry.getId();
+        //Check if the movie is already a favorite
+        Set<String> favoritesSet = sharedPreferences.getStringSet(MainActivity.FAVORITES_KEY, null);
+        if(favoritesSet != null) {
+            if(favoritesSet.contains(String.valueOf(movieId))) {
+                item.setIcon(android.R.drawable.btn_star_big_off);
+                favoritesSet.remove(String.valueOf(movieId));
+            } else {
+                item.setIcon(android.R.drawable.btn_star_big_on);
+                favoritesSet.add(String.valueOf(movieId));
+            }
+        } else {
+            item.setIcon(android.R.drawable.btn_star_big_on);
+            favoritesSet = new HashSet<>();
+            favoritesSet.add(String.valueOf(movieId));
+            sharedPreferences.edit().putStringSet(MainActivity.FAVORITES_KEY, favoritesSet).apply();
+        }
     }
 
     private void fillDetails() {
