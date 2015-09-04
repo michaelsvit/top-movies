@@ -21,9 +21,10 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements MainActivityFragment.GetMoviesList {
 
+    private Menu menu;
     protected List<MovieEntry> movieEntries;
-    String currentSorting;
-    SharedPreferences sharedPreferences;
+    private String currentSorting;
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +61,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        //Save menu to show favorite option later
+        this.menu = menu;
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
@@ -84,6 +87,9 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
 
     @Override
     public void onBackPressed() {
+        //Hide favorite menu action
+        menu.findItem(R.id.action_favorite).setVisible(false);
+
         FragmentManager manager = getFragmentManager();
         if(manager.getBackStackEntryCount() > 0) {
             manager.popBackStack();
@@ -99,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
 
     @Override
     public void showMovieDetails(MovieEntry movie) {
+        //Show movie details in a new fragment
         DetailsFragment fragment = new DetailsFragment();
         Bundle args = new Bundle();
         args.putParcelable(DetailsFragment.MOVIE_ARG_POSITION, movie);
@@ -108,6 +115,9 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         transaction.replace(R.id.activity_main_container, fragment);
         transaction.addToBackStack(null);
         transaction.commit();
+
+        //Show menu option to favorite a movie
+        menu.findItem(R.id.action_favorite).setVisible(true);
     }
 
     private void updateGridContent() {
