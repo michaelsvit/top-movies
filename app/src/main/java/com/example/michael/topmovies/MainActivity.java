@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements
-        MainActivityFragment.GetMoviesList, DetailsFragment.GetFavoritesDB, FavoritesDB.AddItemsToGrid {
+        MainActivityFragment.GetMoviesList, DetailsFragment.Favorites, FavoritesDB.AddItemsToGrid {
 
     private FavoritesDB favoritesDB;
     protected List<MovieEntry> movieEntries;
@@ -136,6 +136,12 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public FavoritesDB getFavoritesDB() {
         return favoritesDB;
+    }
+
+    @Override
+    public void removeFavoriteFromGrid(MovieEntry movieEntry) {
+        movieEntries.remove(movieEntry);
+        updateGridContent();
     }
 
     @Override

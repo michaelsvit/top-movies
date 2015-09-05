@@ -36,11 +36,12 @@ public class DetailsFragment extends Fragment {
 
     private MovieEntry movieEntry;
     private View rootView;
-    private GetFavoritesDB getDbCallback;
+    private Favorites callback;
     private FavoritesDB favoritesDB;
 
-    public interface GetFavoritesDB {
+    public interface Favorites {
         FavoritesDB getFavoritesDB();
+        void removeFavoriteFromGrid(MovieEntry movieEntry);
     }
 
     @Override
@@ -66,10 +67,10 @@ public class DetailsFragment extends Fragment {
 
         Activity activity = getActivity();
         try {
-            getDbCallback = (GetFavoritesDB) activity;
-            favoritesDB = getDbCallback.getFavoritesDB();
+            callback = (Favorites) activity;
+            favoritesDB = callback.getFavoritesDB();
         } catch (ClassCastException e) {
-            Log.e(LOG_TAG, "MainActivity did not implement GetFavoritesDB");
+            Log.e(LOG_TAG, "MainActivity did not implement Favorites");
         }
     }
 
@@ -106,6 +107,7 @@ public class DetailsFragment extends Fragment {
             if(favoritesDB.isFavorite(movieId)) {
                 item.setIcon(android.R.drawable.btn_star_big_off);
                 favoritesDB.removeFavorite(movieId);
+                callback.removeFavoriteFromGrid(movieEntry);
             } else {
                 item.setIcon(android.R.drawable.btn_star_big_on);
                 favoritesDB.setFavorite(movieEntry);
