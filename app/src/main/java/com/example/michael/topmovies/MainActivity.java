@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements
-        MainActivityFragment.GetMoviesList, DetailsFragment.GetFavoritesDB {
+        MainActivityFragment.GetMoviesList, DetailsFragment.GetFavoritesDB, FavoritesDB.AddItemsToGrid {
 
     private FavoritesDB favoritesDB;
     protected List<MovieEntry> movieEntries;
@@ -42,16 +42,16 @@ public class MainActivity extends AppCompatActivity implements
         movieEntries = new ArrayList<>();
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         currentSorting = sharedPreferences.getString(getString(R.string.pref_sort_by_key), getString(R.string.pref_sort_by_default_value));
-        favoritesDB = new FavoritesDB(this);
 
-        //TODO: Fix startup when sorting pref equals favorites
         if(!currentSorting.equals("Favorites")) {
             //Initiate AsyncTask to download data from TMDb
             new GetMoviesList().execute();
+
+            //Load favorites database for later use
+            favoritesDB = new FavoritesDB(this, false);
         } else {
             //Show favorites from database
-            movieEntries.addAll(favoritesDB.getFavorites());
-            updateGridContent();
+            favoritesDB = new FavoritesDB(this, true);
         }
     }
 
@@ -136,6 +136,12 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public FavoritesDB getFavoritesDB() {
         return favoritesDB;
+    }
+
+    @Override
+    public void addFavorites(List<MovieEntry> movieEntries) {
+        this.movieEntries.addAll(movieEntries);
+        updateGridContent();
     }
 
     private class GetMoviesList extends GetData {

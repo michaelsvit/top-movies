@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,12 +14,30 @@ import java.util.List;
  * Created by Michael on 9/4/2015.
  */
 public class FavoritesDB {
-    FavoritesDbHelper dbHelper;
-    SQLiteDatabase db;
+    private final String LOG_TAG = FavoritesDB.class.getSimpleName();
 
-    public FavoritesDB(Context context) {
+    private FavoritesDbHelper dbHelper;
+    private SQLiteDatabase db;
+    private AddItemsToGrid callback;
+
+    public interface AddItemsToGrid {
+        void addFavorites(List<MovieEntry> movieEntries);
+    }
+
+    public FavoritesDB(Context context, boolean requestFavorites) {
+        //Request AddItemsToGrid implementation in context
+        try {
+            callback = (AddItemsToGrid) context;
+        } catch (ClassCastException e) {
+            Log.e(LOG_TAG, "Calling activity did not implement AddItemsToGrid interface");
+        }
+
         dbHelper = new FavoritesDbHelper(context);
-        new GetDB().execute();
+        if (requestFavorites) {
+            new GetDB().execute(true);
+        } else {
+            new GetDB().execute(false);
+        }
     }
 
     public void setFavorite(MovieEntry movieEntry) {
@@ -29,7 +48,7 @@ public class FavoritesDB {
             values.put(FavoritesContract.Favorites.COLUMN_NAME_MOVIE_OVERVIEW, movieEntry.getOverview());
             values.put(FavoritesContract.Favorites.COLUMN_NAME_MOVIE_RELEASE_DATE, movieEntry.getReleaseDate());
             values.put(FavoritesContract.Favorites.COLUMN_NAME_MOVIE_POSTER_PATH, movieEntry.getPosterPath());
-            values.put(FavoritesContract.Favorites.COLUMN_NAME_MOVIE_BACKDROP_PATH, movieEntry.getPosterPath());
+            values.put(FavoritesContract.Favorites.COLUMN_NAME_MOVIE_BACKDROP_PATH, movieEntry.getBackdropPath());
             values.put(FavoritesContract.Favorites.COLUMN_NAME_MOVIE_VOTE_AVERAGE, movieEntry.getVoteAverage());
             db.insert(FavoritesContract.Favorites.TABLE_NAME, null, values);
         }
@@ -82,10 +101,20 @@ public class FavoritesDB {
         return movieEntries;
     }
 
-    private class GetDB extends AsyncTask<Void, Void, Void> {
+    private class GetDB extends AsyncTask<Boolean, Void, Void> {
+
+        boolean requestFavorites;
 
         @Override
-        protected Void doInBackground(Void... params) {
+        protected void onPostExecute(Void aVoid) {
+            if(requestFavorites) {
+                callback.addFavorites(getFavorites());
+            }
+        }
+
+        @Override
+        protected Void doInBackground(Boolean... params) {
+            requestFavorites = params[0];
             db = dbHelper.getWritableDatabase();
             return null;
         }
