@@ -27,24 +27,24 @@
 
             <LinearLayout
                 android:paddingTop="16dp"
+                android:gravity="center"
                 android:layout_weight="2"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
                 <TextView
-                    android:layout_weight="2"
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
+                    android:layout_height="wrap_content"
                     android:textSize="16sp"
                     android:text="@string/details_release_date_title"
                     android:textColor="@color/textSecondary"
                     android:gravity="center_horizontal"/>
 
                 <TextView android:id="@+id/details_release_date"
-                    android:layout_weight="3"
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="24dp"
                     android:textSize="24sp"
                     android:textStyle="bold"
                     android:text="@string/details_dummy_release_date"
@@ -52,18 +52,16 @@
                     android:gravity="center_horizontal"/>
 
                 <TextView
-                    android:layout_weight="2"
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
+                    android:layout_height="wrap_content"
                     android:textSize="16sp"
                     android:text="@string/details_audience_rating_title"
                     android:textColor="@color/textSecondary"
                     android:gravity="center_horizontal"/>
 
                 <TextView android:id="@+id/details_rating"
-                    android:layout_weight="3"
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
+                    android:layout_height="wrap_content"
                     android:textSize="24sp"
                     android:textStyle="bold"
                     android:text="@string/details_dummy_audience_rating"
@@ -75,7 +73,9 @@
             <ImageView android:id="@+id/details_movie_poster"
                 android:layout_weight="1"
                 android:layout_width="0dp"
-                android:layout_height="match_parent" />
+                android:layout_height="wrap_content"
+                android:scaleType="centerInside"
+                android:adjustViewBounds="true"/>
 
         </LinearLayout>
 

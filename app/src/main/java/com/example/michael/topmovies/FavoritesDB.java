@@ -40,6 +40,10 @@ public class FavoritesDB {
         }
     }
 
+    public void closeDatabase() {
+        db.close();
+    }
+
     public void setFavorite(MovieEntry movieEntry) {
         if(db != null) {
             ContentValues values = new ContentValues();

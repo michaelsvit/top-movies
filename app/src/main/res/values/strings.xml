@@ -15,5 +15,6 @@
     <string name="details_trailers_title">Trailers</string>
     <string name="details_reviews_title">Reviews</string>
     <string name="menu_main_action_favorite_title">Favorite</string>
+    <string name="fragment_details_blank_text">Pick a movie to show details</string>
 
 </resources>

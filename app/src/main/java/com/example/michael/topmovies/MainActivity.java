@@ -1,15 +1,18 @@
 package com.example.michael.topmovies;
 
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.LinearLayout;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,8 +23,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements
-        MainActivityFragment.GetMoviesList, DetailsFragment.Favorites, FavoritesDB.AddItemsToGrid {
+        MainActivityFragment.MoviesContainer, MainActivityFragment.TwoPane, DetailsFragment.Favorites, FavoritesDB.AddItemsToGrid {
 
+    private boolean twoPane;
+    private int screenSize;
+    private int orientation;
     private FavoritesDB favoritesDB;
     protected List<MovieEntry> movieEntries;
     private String currentSorting;
@@ -32,12 +38,18 @@ public class MainActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //Attach gridView fragment to the activity, or the last viewed fragment if one exists
-        if(savedInstanceState == null) {
-            MainActivityFragment mainActivityFragment = new MainActivityFragment();
-            FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            transaction.add(R.id.activity_main_container, mainActivityFragment, MainActivityFragment.FRAGMENT_TAG).commit();
+        Configuration configuration = getResources().getConfiguration();
+        screenSize = configuration.screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
+        orientation = configuration.orientation;
+        twoPane = determineTwoPane();
+
+        //Remove details fragment and holder if needed
+        if((screenSize == Configuration.SCREENLAYOUT_SIZE_LARGE) && (orientation == Configuration.ORIENTATION_PORTRAIT)) {
+            LinearLayout fragmentsContainer = (LinearLayout)findViewById(R.id.main_activity_fragments_container);
+            fragmentsContainer.removeView(findViewById(R.id.details_fragment));
         }
+        //Attach fragment(s) depending on layout size
+        attachFragments();
 
         movieEntries = new ArrayList<>();
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -52,6 +64,88 @@ public class MainActivity extends AppCompatActivity implements
         } else {
             //Show favorites from database
             favoritesDB = new FavoritesDB(this, true);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(favoritesDB != null) {
+            favoritesDB.closeDatabase();
+        }
+    }
+
+    private void attachFragments() {
+        FragmentManager fragmentManager = getFragmentManager();
+
+        //If fragments are already attached, remove them
+        Fragment fragment = fragmentManager.findFragmentByTag(MainActivityFragment.FRAGMENT_TAG);
+        if(fragment != null) {
+            fragmentManager.beginTransaction().remove(fragment).commit();
+        }
+
+        fragment = fragmentManager.findFragmentByTag(DetailsFragment.FRAGMENT_TAG);
+        if(fragment != null) {
+            if ((orientation == Configuration.ORIENTATION_PORTRAIT || screenSize == Configuration.SCREENLAYOUT_SIZE_NORMAL) && screenSize != Configuration.SCREENLAYOUT_SIZE_XLARGE) {
+                attachMasterFragment(fragment);
+            } else {
+                //Move details fragment from master_fragment to details_fragment
+                attachMasterFragment(null);
+                attachDetailsFragment(fragment);
+            }
+        } else {
+            attachMasterFragment(null);
+            if(twoPane) {
+                attachDetailsFragment(null);
+            }
+        }
+    }
+
+    private void attachMasterFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        int fragmentContainer = R.id.master_fragment;
+
+        if(fragment == null) {
+            fragment = new MainActivityFragment();
+            transaction.add(fragmentContainer, fragment, MainActivityFragment.FRAGMENT_TAG).commit();
+        } else {
+            transaction.remove(fragment).commit();
+            fragmentManager.executePendingTransactions();
+            transaction = fragmentManager.beginTransaction();
+            transaction.add(fragmentContainer, fragment, DetailsFragment.FRAGMENT_TAG).commit();
+        }
+    }
+
+    private void attachDetailsFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        int fragmentContainer = R.id.details_fragment;
+
+        if(fragment == null) {
+            fragment = new DetailsFragment();
+            Bundle args = new Bundle();
+            args.putInt(DetailsFragment.FRAGMENT_RES_ID_POSITION, R.layout.details_fragment_blank);
+            fragment.setArguments(args);
+            transaction.add(fragmentContainer, fragment, "blankFragment").commit();
+        } else {
+            fragmentManager.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            transaction.remove(fragment).commit();
+            fragmentManager.executePendingTransactions();
+            transaction = fragmentManager.beginTransaction();
+            transaction.add(fragmentContainer, fragment, DetailsFragment.FRAGMENT_TAG).commit();
+        }
+    }
+
+    private boolean determineTwoPane() {
+        if(findViewById(R.id.details_fragment) != null) {
+            if ((screenSize == Configuration.SCREENLAYOUT_SIZE_LARGE) && (orientation == Configuration.ORIENTATION_PORTRAIT)) {
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            return false;
         }
     }
 
@@ -102,9 +196,21 @@ public class MainActivity extends AppCompatActivity implements
         FragmentManager manager = getFragmentManager();
         if(manager.getBackStackEntryCount() > 0) {
             manager.popBackStack();
+        } else if(!twoPane) {
+            if(manager.findFragmentByTag(MainActivityFragment.FRAGMENT_TAG) == null) {
+                replaceMasterFragment(new MainActivityFragment());
+            } else {
+                attachMasterFragment(null);
+            }
         } else {
             super.onBackPressed();
         }
+    }
+
+    private void replaceMasterFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.master_fragment, fragment, MainActivityFragment.FRAGMENT_TAG).commit();
     }
 
     @Override
@@ -115,19 +221,23 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void showMovieDetails(MovieEntry movie) {
         //Show movie details in a new fragment
-        DetailsFragment fragment = new DetailsFragment();
+        Fragment fragment = new DetailsFragment();
         Bundle args = new Bundle();
         args.putParcelable(DetailsFragment.MOVIE_ARG_POSITION, movie);
         fragment.setArguments(args);
 
-        android.app.FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.replace(R.id.activity_main_container, fragment);
-        transaction.addToBackStack(null);
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        if(!twoPane) {
+            transaction.replace(R.id.master_fragment, fragment, DetailsFragment.FRAGMENT_TAG);
+        } else {
+            transaction.replace(R.id.details_fragment, fragment, DetailsFragment.FRAGMENT_TAG);
+        }
+
         transaction.commit();
     }
 
     private void updateGridContent() {
-        MainActivityFragment fragment = (MainActivityFragment) getFragmentManager().findFragmentByTag("grid_view_fragment");
+        MainActivityFragment fragment = (MainActivityFragment) getFragmentManager().findFragmentByTag(MainActivityFragment.FRAGMENT_TAG);
         if (fragment != null) {
             fragment.updateGridContent();
         }
@@ -150,6 +260,11 @@ public class MainActivity extends AppCompatActivity implements
         updateGridContent();
     }
 
+    @Override
+    public boolean isTwoPane() {
+        return twoPane;
+    }
+
     private class GetMoviesList extends GetData {
         @Override
         protected void onPostExecute(Void aVoid) {
@@ -162,9 +277,7 @@ public class MainActivity extends AppCompatActivity implements
         protected Void doInBackground(Void... params) {
             try {
                 String discoverUrl = constructDiscoverUrl();
-                Log.d(LOG_TAG, "Constructed URL: " + discoverUrl);
                 String jsonData = downloadData(discoverUrl);
-                Log.d(LOG_TAG, "JSON data: " + jsonData);
                 List<MovieEntry> movies = parseDiscoverJson(jsonData);
 
                 if (movies != null) {

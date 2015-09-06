@@ -32,6 +32,8 @@ import java.util.List;
 public class DetailsFragment extends Fragment {
 
     public static final String MOVIE_ARG_POSITION = "MovieEntry";
+    public static final String FRAGMENT_RES_ID_POSITION = "resId";
+    public static final String FRAGMENT_TAG = "detailsFragment";
     private final String LOG_TAG = DetailsFragment.class.getSimpleName();
 
     private MovieEntry movieEntry;
@@ -47,16 +49,24 @@ public class DetailsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Bundle args = getArguments();
         // Inflate the layout for this fragment
-        rootView = inflater.inflate(R.layout.fragment_details, container, false);
+        int resId;
+        if(args.containsKey(FRAGMENT_RES_ID_POSITION)) {
+            resId = args.getInt(FRAGMENT_RES_ID_POSITION);
+        } else {
+            resId = R.layout.fragment_details;
+        }
+        rootView = inflater.inflate(resId, container, false);
 
-        setHasOptionsMenu(true);
+        movieEntry = args.getParcelable(MOVIE_ARG_POSITION);
+        if (movieEntry != null) {
+            setHasOptionsMenu(true);
 
-        //Populate views with data from movie argument
-        movieEntry = getArguments().getParcelable(MOVIE_ARG_POSITION);
-        new GetTrailerAndReviews().execute();
-
-        fillDetails();
+            //Populate views with data from movie argument
+            new GetTrailerAndReviews().execute();
+            fillDetails();
+        }
 
         return rootView;
     }
@@ -148,13 +158,17 @@ public class DetailsFragment extends Fragment {
     private void fillTrailersAndReviews() {
         Activity activity = getActivity();
         if(activity != null) {
-            LinearLayout trailersContainer = (LinearLayout) rootView.findViewById(R.id.details_trailers_container);
-            //Fill trailers section with entries and add separator lines
-            fillTrailers(activity, trailersContainer);
+            if (movieEntry.getTrailers() != null) {
+                LinearLayout trailersContainer = (LinearLayout) rootView.findViewById(R.id.details_trailers_container);
+                //Fill trailers section with entries and add separator lines
+                fillTrailers(activity, trailersContainer);
+            }
 
-            LinearLayout reviewsContainer = (LinearLayout) rootView.findViewById(R.id.details_reviews_container);
-            //Fill reviews section with reviews and add separator lines
-            fillReviews(activity, reviewsContainer);
+            if (movieEntry.getReviews() != null) {
+                LinearLayout reviewsContainer = (LinearLayout) rootView.findViewById(R.id.details_reviews_container);
+                //Fill reviews section with reviews and add separator lines
+                fillReviews(activity, reviewsContainer);
+            }
         }
     }
 

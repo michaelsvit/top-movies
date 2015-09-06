@@ -1,6 +1,7 @@
 package com.example.michael.topmovies;
 
 import android.app.Activity;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -20,15 +21,20 @@ import java.util.List;
 public class MainActivityFragment extends android.app.Fragment {
 
     final String LOG_TAG = MainActivityFragment.class.getSimpleName();
-    public static final String FRAGMENT_TAG = "grid_view_fragment";
+    public static final String FRAGMENT_TAG = "mainActivityFragment";
 
-    GetMoviesList callback;
+    MoviesContainer moviesContainerCallback;
+    TwoPane twoPaneCallback;
     ArrayAdapter<MovieEntry> adapter;
     List<MovieEntry> movieEntries;
 
-    public interface GetMoviesList {
+    public interface MoviesContainer {
         List<MovieEntry> getMovieEntries();
         void showMovieDetails(MovieEntry movie);
+    }
+
+    public interface TwoPane {
+        boolean isTwoPane();
     }
 
     public MainActivityFragment() {
@@ -43,7 +49,7 @@ public class MainActivityFragment extends android.app.Fragment {
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                callback.showMovieDetails(movieEntries.get(position));
+                moviesContainerCallback.showMovieDetails(movieEntries.get(position));
             }
         });
 
@@ -75,16 +81,27 @@ public class MainActivityFragment extends android.app.Fragment {
 
         Activity activity = getActivity();
         try {
-            callback = (GetMoviesList) activity;
+            moviesContainerCallback = (MoviesContainer) activity;
+            twoPaneCallback = (TwoPane) activity;
         } catch (ClassCastException e) {
-            Log.e(LOG_TAG, "Activity did not implement GetMoviesList interface");
+            Log.e(LOG_TAG, "Activity did not implement MoviesContainer or TwoPane interface");
         }
 
-        movieEntries = callback.getMovieEntries();
+        movieEntries = moviesContainerCallback.getMovieEntries();
 
         //Bind adapter to GridView
         adapter = new ImageAdapter(activity, movieEntries);
         GridView gridView = (GridView) activity.findViewById(R.id.grid_view);
+        //Set grid view number of columns according to two-pane mode and orientation
+        if(twoPaneCallback.isTwoPane()) {
+            if((getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_LARGE) {
+                gridView.setNumColumns(2);
+            } else {
+                if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    gridView.setNumColumns(1);
+                }
+            }
+        }
         gridView.setAdapter(adapter);
     }
 
