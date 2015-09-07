@@ -59,11 +59,15 @@ public class MainActivity extends AppCompatActivity implements
             //Initiate AsyncTask to download data from TMDb
             new GetMoviesList().execute();
 
-            //Load favorites database for later use
-            favoritesDB = new FavoritesDB(this, false);
+            if(savedInstanceState == null) {
+                //Load favorites database for later use
+                favoritesDB = new FavoritesDB(this, false);
+            }
         } else {
-            //Show favorites from database
-            favoritesDB = new FavoritesDB(this, true);
+            if(savedInstanceState == null) {
+                //Show favorites from database
+                favoritesDB = new FavoritesDB(this, true);
+            }
         }
     }
 
@@ -194,14 +198,12 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onBackPressed() {
         FragmentManager manager = getFragmentManager();
+        Fragment mainActivityFragment = manager.findFragmentByTag(MainActivityFragment.FRAGMENT_TAG);
+
         if(manager.getBackStackEntryCount() > 0) {
             manager.popBackStack();
-        } else if(!twoPane) {
-            if(manager.findFragmentByTag(MainActivityFragment.FRAGMENT_TAG) == null) {
-                replaceMasterFragment(new MainActivityFragment());
-            } else {
-                attachMasterFragment(null);
-            }
+        } else if(!twoPane && screenSize != Configuration.SCREENLAYOUT_SIZE_NORMAL && mainActivityFragment == null) {
+            replaceMasterFragment(new MainActivityFragment());
         } else {
             super.onBackPressed();
         }
@@ -229,6 +231,9 @@ public class MainActivity extends AppCompatActivity implements
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         if(!twoPane) {
             transaction.replace(R.id.master_fragment, fragment, DetailsFragment.FRAGMENT_TAG);
+            if(screenSize == Configuration.SCREENLAYOUT_SIZE_NORMAL) {
+                transaction.addToBackStack(null);
+            }
         } else {
             transaction.replace(R.id.details_fragment, fragment, DetailsFragment.FRAGMENT_TAG);
         }

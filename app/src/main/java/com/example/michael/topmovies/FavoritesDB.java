@@ -74,6 +74,8 @@ public class FavoritesDB {
             if(c.moveToFirst()) {
                 return true;
             }
+        } else {
+            Log.e(LOG_TAG, "Trying to access a null database");
         }
         return false;
     }

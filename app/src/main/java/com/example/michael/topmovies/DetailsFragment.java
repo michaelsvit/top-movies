@@ -34,12 +34,14 @@ public class DetailsFragment extends Fragment {
     public static final String MOVIE_ARG_POSITION = "MovieEntry";
     public static final String FRAGMENT_RES_ID_POSITION = "resId";
     public static final String FRAGMENT_TAG = "detailsFragment";
+    private final String FAVORITE_STATE_TAG = "favoriteState";
     private final String LOG_TAG = DetailsFragment.class.getSimpleName();
 
     private MovieEntry movieEntry;
     private View rootView;
     private Favorites callback;
     private FavoritesDB favoritesDB;
+    private boolean favoriteState;
 
     public interface Favorites {
         FavoritesDB getFavoritesDB();
@@ -59,6 +61,15 @@ public class DetailsFragment extends Fragment {
         }
         rootView = inflater.inflate(resId, container, false);
 
+        //Try to recover favorite state after recreating fragment
+        if(savedInstanceState != null) {
+            if(savedInstanceState.containsKey(FAVORITE_STATE_TAG)) {
+                favoriteState = savedInstanceState.getBoolean(FAVORITE_STATE_TAG);
+            }
+        } else {
+            favoriteState = false;
+        }
+
         movieEntry = args.getParcelable(MOVIE_ARG_POSITION);
         if (movieEntry != null) {
             setHasOptionsMenu(true);
@@ -69,6 +80,12 @@ public class DetailsFragment extends Fragment {
         }
 
         return rootView;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(FAVORITE_STATE_TAG, favoriteState);
     }
 
     @Override
@@ -90,9 +107,14 @@ public class DetailsFragment extends Fragment {
         MenuItem favoritesMenuItem = menu.findItem(R.id.action_favorite);
 
         if (favoritesDB != null) {
-            if(favoritesDB.isFavorite(movieEntry.getId())) {
+            if (favoritesDB.isFavorite(movieEntry.getId())) {
                 favoritesMenuItem.setIcon(android.R.drawable.btn_star_big_on);
+                favoriteState = true;
             }
+        } else if(favoriteState) {
+            favoritesMenuItem.setIcon(android.R.drawable.btn_star_big_on);
+        } else {
+            Log.e(LOG_TAG, "Trying to access null favorites database");
         }
 
         favoritesMenuItem.setVisible(true);
@@ -118,9 +140,11 @@ public class DetailsFragment extends Fragment {
                 item.setIcon(android.R.drawable.btn_star_big_off);
                 favoritesDB.removeFavorite(movieId);
                 callback.removeFavoriteFromGrid(movieEntry);
+                favoriteState = false;
             } else {
                 item.setIcon(android.R.drawable.btn_star_big_on);
                 favoritesDB.setFavorite(movieEntry);
+                favoriteState = true;
             }
         }
     }
