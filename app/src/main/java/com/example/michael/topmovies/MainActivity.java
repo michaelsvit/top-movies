@@ -59,15 +59,11 @@ public class MainActivity extends AppCompatActivity implements
             //Initiate AsyncTask to download data from TMDb
             new GetMoviesList().execute();
 
-            if(savedInstanceState == null) {
-                //Load favorites database for later use
-                favoritesDB = new FavoritesDB(this, false);
-            }
+            //Load favorites database for later use
+            favoritesDB = new FavoritesDB(this, false);
         } else {
-            if(savedInstanceState == null) {
-                //Show favorites from database
-                favoritesDB = new FavoritesDB(this, true);
-            }
+            //Show favorites from database
+            favoritesDB = new FavoritesDB(this, true);
         }
     }
 
@@ -246,11 +242,6 @@ public class MainActivity extends AppCompatActivity implements
         if (fragment != null) {
             fragment.updateGridContent();
         }
-    }
-
-    @Override
-    public FavoritesDB getFavoritesDB() {
-        return favoritesDB;
     }
 
     @Override

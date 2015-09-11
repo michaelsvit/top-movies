@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -33,10 +32,9 @@ public class FavoritesDB {
         }
 
         dbHelper = new FavoritesDbHelper(context);
+        db = dbHelper.getWritableDatabase();
         if (requestFavorites) {
-            new GetDB().execute(true);
-        } else {
-            new GetDB().execute(false);
+            callback.addFavorites(getFavorites());
         }
     }
 
@@ -105,24 +103,5 @@ public class FavoritesDB {
         }
 
         return movieEntries;
-    }
-
-    private class GetDB extends AsyncTask<Boolean, Void, Void> {
-
-        boolean requestFavorites;
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            if(requestFavorites) {
-                callback.addFavorites(getFavorites());
-            }
-        }
-
-        @Override
-        protected Void doInBackground(Boolean... params) {
-            requestFavorites = params[0];
-            db = dbHelper.getWritableDatabase();
-            return null;
-        }
     }
 }
